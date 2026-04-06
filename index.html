@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>カウンセリング技術共有 評価シート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#F5F0EB;--surface:#EDE6DD;--card:#FDFAF6;--text:#3E3226;--text2:#7A6B5D;--text3:#A89B8C;--light:#F5F0EB;--gold:#C5A55A;--gold-l:#E8D5A0;--warm:#D4956A;--sage:#7BA485;--rose:#C9727A;--blue:#6B8EAD;--border:rgba(62,50,38,.08);--border2:rgba(62,50,38,.15);--r:12px;--shadow:0 2px 8px rgba(62,50,38,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP','Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:80px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+header{background:rgba(62,50,38,.95);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(197,165,90,.2)}
+.h-inner{max-width:1000px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-i{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--warm));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo h1{font-size:15px;color:var(--light);font-weight:600}
+.logo-s{font-size:10px;color:var(--gold-l);margin-top:1px}
+.h-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:7px 14px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--warm));color:#fff}
+.btn-sage{background:rgba(123,164,133,.9);color:#fff}
+.btn-outline{background:rgba(255,255,255,.08);color:var(--gold-l);border:1px solid rgba(255,255,255,.15)}
+.btn-rose{background:rgba(201,114,122,.15);color:var(--rose)}
+
+.container{max-width:1000px;margin:0 auto;padding:16px}
+
+/* タブ */
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.tab-wrap{display:flex;align-items:center;position:relative;flex-shrink:0}
+.tab{padding:8px 14px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:8px 8px 0 0;white-space:nowrap}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(197,165,90,.08);font-weight:600}
+.tab-del{display:none;position:absolute;right:-2px;top:2px;background:var(--rose);color:#fff;border:none;cursor:pointer;font-size:8px;width:14px;height:14px;border-radius:50%;line-height:1}
+.tab-wrap:hover .tab-del{display:flex;align-items:center;justify-content:center}
+.tab-add{color:var(--sage);font-size:16px;padding:8px 12px;border:none;background:none;cursor:pointer;flex-shrink:0}
+
+/* 情報バー */
+.info-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:10px 14px;background:var(--card);border-radius:var(--r);border:1px solid var(--border)}
+.info-bar label{font-size:12px;color:var(--text2);font-weight:500}
+.info-bar input,.info-bar select{padding:5px 8px;border:1px solid var(--border2);border-radius:6px;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg)}
+.info-bar input:focus,.info-bar select:focus{outline:none;border-color:var(--gold)}
+.info-bar input[type=text]{width:120px}
+
+/* スタッフ選択 */
+.staff-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.staff-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--card);font-size:12px;cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap}
+.staff-chip.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.staff-chip.add{border-style:dashed;color:var(--sage)}
+
+/* 動画セクション */
+.video-sec{margin-bottom:16px;padding:14px;background:var(--card);border-radius:var(--r);border:1px solid var(--border)}
+.video-sec h3{font-size:13px;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.video-input{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.video-input input{flex:1;min-width:200px;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg)}
+.video-input input:focus{outline:none;border-color:var(--gold)}
+.video-link{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(107,142,173,.1);border-radius:6px;font-size:11px;color:var(--blue);text-decoration:none;margin-top:6px;word-break:break-all}
+.video-link:hover{background:rgba(107,142,173,.2)}
+
+/* 評価カテゴリ */
+.cat-sec{margin-bottom:16px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);animation:fadeIn .4s ease}
+.cat-header{padding:12px 14px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.cat-header.basic{background:linear-gradient(135deg,rgba(123,164,133,.15),rgba(123,164,133,.05));color:#4a7a55}
+.cat-header.tactics{background:linear-gradient(135deg,rgba(197,165,90,.15),rgba(197,165,90,.05));color:#8a7030}
+.cat-header .sub{font-size:11px;font-weight:400;color:var(--text3)}
+.cat-header .subtotal{font-family:'Inter',sans-serif;font-weight:700;font-size:16px}
+
+/* 評価テーブル */
+.eval-table{width:100%;border-collapse:collapse;font-size:12px}
+.eval-table th{padding:8px 6px;background:rgba(197,165,90,.06);color:var(--text2);font-weight:600;font-size:10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0}
+.eval-table th:first-child{text-align:left;padding-left:14px;min-width:40%}
+.eval-table td{padding:6px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle}
+.eval-table td:first-child{text-align:left;padding-left:14px;font-size:12px;line-height:1.4}
+.eval-table tr:hover td{background:rgba(197,165,90,.03)}
+.item-text{cursor:text;min-height:20px;padding:2px 4px;border-radius:4px;transition:background .2s;word-break:break-all}
+.item-text:hover{background:rgba(197,165,90,.08)}
+.item-text:focus{outline:none;background:rgba(197,165,90,.12)}
+.item-cell{display:flex;align-items:center;gap:4px}
+.item-cell .item-text{flex:1}
+.item-del{width:16px;height:16px;border-radius:50%;border:none;background:rgba(201,114,122,.1);color:var(--rose);font-size:9px;cursor:pointer;opacity:0;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.eval-table tr:hover .item-del{opacity:1}
+.item-del:hover{background:var(--rose);color:#fff}
+
+/* スコアボタン */
+.sc{display:flex;gap:2px;justify-content:center}
+.sc button{width:26px;height:26px;border-radius:5px;border:1px solid var(--border2);background:var(--bg);cursor:pointer;font-size:11px;font-weight:600;color:var(--text3);transition:all .15s}
+.sc button.a{border-color:transparent;color:#fff}
+.sc button.s1{background:#C9727A!important}.sc button.s2{background:#D4956A!important}
+.sc button.s3{background:#C5A55A!important}.sc button.s4{background:#6B8EAD!important}
+.sc button.s5{background:#7BA485!important}
+
+/* 差点 */
+.diff-cell{font-family:'Inter',sans-serif;font-weight:700;font-size:13px;min-width:32px}
+.diff-pos{color:#C9727A}.diff-neg{color:#6B8EAD}.diff-zero{color:var(--text3)}
+.diff-row{background:rgba(201,114,122,.06)!important}
+.diff-row td{background:rgba(201,114,122,.06)!important}
+
+/* ピックアップ */
+.pickup-sec{margin-bottom:16px;padding:14px;background:var(--card);border-radius:var(--r);border:1px solid rgba(201,114,122,.2)}
+.pickup-sec h3{font-size:13px;color:var(--rose);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pickup-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:rgba(201,114,122,.06);margin-bottom:4px;font-size:12px}
+.pickup-item .p-cat{font-size:10px;color:var(--text3);min-width:30px;font-weight:600}
+.pickup-item .p-diff{font-family:'Inter',sans-serif;font-weight:700;color:var(--rose);min-width:28px;text-align:right}
+.pickup-empty{font-size:12px;color:var(--text3);padding:8px 0}
+
+/* 合計・評価 */
+.total-bar{padding:12px 14px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.total-item{text-align:center}
+.total-label{font-size:10px;color:var(--text3);margin-bottom:2px}
+.total-val{font-family:'Inter',sans-serif;font-size:22px;font-weight:700}
+.grade{display:inline-block;padding:4px 16px;border-radius:8px;font-family:'Inter',sans-serif;font-size:28px;font-weight:700;color:#fff}
+.grade-a{background:linear-gradient(135deg,#7BA485,#5D8B6A)}
+.grade-b{background:linear-gradient(135deg,#6B8EAD,#4A7A9E)}
+.grade-c{background:linear-gradient(135deg,#C5A55A,#A89040)}
+.grade-d{background:linear-gradient(135deg,#D4956A,#C07840)}
+.grade-e{background:linear-gradient(135deg,#C9727A,#B05560)}
+
+/* 評価メモ */
+.memo-sec{margin-bottom:24px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.memo-sec h3{font-size:13px;color:var(--text2);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;margin:0}
+.memo-area{width:100%;min-height:120px;border:none;padding:12px 14px;font-family:inherit;font-size:13px;color:var(--text);line-height:1.7;resize:vertical;background:transparent}
+.memo-area:focus{outline:none;background:rgba(197,165,90,.03)}
+.memo-area::placeholder{color:var(--text3)}
+
+/* 項目追加 */
+.add-item-btn{display:flex;align-items:center;gap:4px;padding:6px 12px;background:none;border:1px dashed var(--border2);border-radius:6px;color:var(--text3);font-size:11px;cursor:pointer;margin:8px 14px;font-family:inherit;transition:all .2s}
+.add-item-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* モーダル */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;justify-content:center;align-items:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{color:var(--gold);font-size:16px;margin-bottom:10px}
+.modal p{color:var(--text2);font-size:13px;line-height:1.6;margin-bottom:20px}
+.modal input{width:100%;padding:10px;border:1px solid var(--border2);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:16px;color:var(--text)}
+.modal input:focus{outline:none;border-color:var(--gold)}
+.m-btns{display:flex;gap:10px;justify-content:center}
+.m-btns button{padding:8px 24px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.m-cancel{background:#eee;color:#666}.m-ok{background:var(--sage);color:#fff}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--light);padding:10px 20px;border-radius:10px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.15);opacity:0;transition:all .4s;z-index:1000;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* 凡例 */
+.legend{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-radius:var(--r);border:1px solid var(--border);margin-bottom:16px;align-items:center}
+.legend span{font-size:10px;color:var(--text2);font-weight:600}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)}
+.leg i{width:12px;height:12px;border-radius:3px;display:block}
+
+/* レスポンシブ */
+@media(max-width:600px){
+    .h-inner{padding:10px 12px}
+    .logo h1{font-size:13px}
+    .container{padding:10px}
+    .sc button{width:30px;height:30px;font-size:12px}
+    .eval-table td:first-child{font-size:11px;padding-left:8px;max-width:140px}
+    .eval-table th:first-child{padding-left:8px}
+    .eval-table th,.eval-table td{padding:6px 3px}
+    .total-val{font-size:18px}
+    .grade{font-size:22px;padding:3px 12px}
+    .cat-header{padding:10px 12px;font-size:13px}
+    .info-bar{padding:8px 10px;gap:8px}
+    .staff-bar{gap:6px}
+    /* テーブルをカード型に変換 */
+    .eval-table thead{display:none}
+    .eval-table, .eval-table tbody{display:block;width:100%}
+    .eval-table tr{display:flex;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border);align-items:center;gap:4px}
+    .eval-table tr:hover td{background:none}
+    .eval-table td{display:block;border:none;padding:0;text-align:left}
+    .eval-table td:first-child{width:100%;margin-bottom:6px;font-size:13px;padding:0;max-width:none}
+    .eval-table td:nth-child(2),.eval-table td:nth-child(3){flex:1}
+    .eval-table td:nth-child(4){flex:0 0 auto}
+    .eval-table td:nth-child(2)::before,.eval-table td:nth-child(3)::before{content:'';display:block;font-size:9px;color:var(--text3);font-weight:600;margin-bottom:2px;text-align:center}
+    .eval-table td:nth-child(2)::before{content:'自己'}
+    .eval-table td:nth-child(3)::before{content:'講師'}
+    .sc{justify-content:center}
+    .sc button{width:34px;height:34px;font-size:13px;border-radius:6px}
+    .item-cell{gap:6px}
+    .item-del{opacity:0.6;width:18px;height:18px;font-size:10px}
+    .diff-cell{font-size:14px}
+    .diff-row{background:rgba(201,114,122,.08)!important}
+    .diff-row td{background:none!important}
+    .pickup-item{flex-wrap:wrap;gap:4px}
+    .total-bar{justify-content:center;gap:14px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="h-inner">
+    <div class="logo"><div class="logo-i">📋</div><div><h1>カウンセリング評価シート</h1><div class="logo-s">ALBUM Counseling Evaluation</div></div></div>
+    <div class="h-btns">
+        <button class="btn btn-outline" onclick="exportXLSX()">📥 Excel出力</button>
+        <button class="btn btn-sage" onclick="saveData()">💾 保存</button>
+    </div>
+</div>
+</header>
+
+<div class="container">
+    <div class="tabs" id="weekTabs"></div>
+    <div class="info-bar" id="infoBar"></div>
+    <div class="staff-bar" id="staffBar"></div>
+    <div class="legend">
+        <span>評価基準：</span>
+        <div class="leg"><i style="background:#C9727A"></i>1</div>
+        <div class="leg"><i style="background:#D4956A"></i>2</div>
+        <div class="leg"><i style="background:#C5A55A"></i>3</div>
+        <div class="leg"><i style="background:#6B8EAD"></i>4</div>
+        <div class="leg"><i style="background:#7BA485"></i>5</div>
+        <span style="margin-left:8px">評価 A(≥90%) B(≥75%) C(≥60%) D(≥45%) E(<45%)</span>
+    </div>
+    <div class="video-sec" id="videoSec"></div>
+    <div id="evalArea"></div>
+    <div class="total-bar" id="totalBar"></div>
+    <div id="pickupSec"></div>
+    <div id="memoSec"></div>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal"><h3 id="mTitle"></h3><p id="mMsg"></p><input id="mInput" style="display:none"><div class="m-btns"><button class="m-cancel" onclick="closeModal()">キャンセル</button><button class="m-ok" id="mOk">OK</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='counsel_eval_v5';
+const DEFAULT_BASIC=[
+    '身だしなみ（ファーストコンタクト）','言葉遣い','目線　表情　姿勢　態度　尊重',
+    '挨拶、カウンセリング内でお客様の名前で呼びかける','距離感（触れ方）','ペースを合わせる（ペーシング）',
+    '技術・施術説明の的確明確さ','視覚・聴覚・身体感覚に合わせる','料金　終わり時間を明確に説明しているか',
+    'Step8の流れ　スムーズさ','お客様の表情　満足度'
+];
+const DEFAULT_TACTICS=[
+    '現在の悩み・不満・不快　要望の傾聴は出来たか','悩みなどの優先順位を把握して理解できたか',
+    '悩みなどに対してポイントで深堀りができてるか','サロンを変えた理由を聞き出して反映しているか',
+    '悩みなどの本質を引き出し安心させれてるか','施術に対しての不安なポイントを理解しているか',
+    '今後の理想の状態の傾聴ができたか','理想の状態を言語化・共有できたか',
+    'お客様の問いを想像できてるか','理想の状態の本質まで導けたか（自問自答レベル）',
+    'オーダーを把握して適切な施術、解決策を提案できたか','今後のスケジュールや未来の提案はできたか',
+    'ライフスタイルに加味した提案はできたか','お客様の想定内の流れの中で終わっていないか',
+    'メニューに囚われない本質の提案力　リーディング力','信頼　安心　ラポール形成は構築できたか',
+    'お客様に対しての尊重を一貫してできているか','パーソナライズされたプランニングができたか',
+    '全ての流れからの次回来店の確実性はあるか','傾聴での発話して無い声の引き出しはできたか',
+    'カウンセリング中や後にワクワク（感動）しているか'
+];
+
+let S={weeks:{},curWeek:1,curStaff:0};
+
+function init(){
+    const saved=localStorage.getItem(KEY);
+    if(saved)S=JSON.parse(saved);
+    if(!S.weeks||!Object.keys(S.weeks).length){S.weeks={1:createWeek()};S.curWeek=1;S.curStaff=0;}
+    // migrate
+    Object.values(S.weeks).forEach(w=>{
+        if(!w.staff)w.staff=[{name:'スタッフ1',self:{},teacher:{},videoUrl:'',memo:''}];
+        w.staff.forEach(s=>{if(!s.videoUrl)s.videoUrl='';if(s.memo===undefined)s.memo='';});
+        if(!w.items)w.items={basic:[...DEFAULT_BASIC],tactics:[...DEFAULT_TACTICS]};
+    });
+    renderAll();
+}
+
+function createWeek(){
+    return{date:new Date().toISOString().slice(0,10),staff:[{name:'スタッフ1',self:{},teacher:{},videoUrl:'',memo:''}],items:{basic:[...DEFAULT_BASIC],tactics:[...DEFAULT_TACTICS]}};
+}
+
+function cur(){return S.weeks[S.curWeek];}
+function staff(){return cur()?.staff[S.curStaff];}
+
+function renderAll(){renderTabs();renderInfo();renderStaff();renderVideo();renderEval();renderTotal();renderPickup();renderMemo();}
+
+function renderTabs(){
+    const c=document.getElementById('weekTabs');c.innerHTML='';
+    const keys=Object.keys(S.weeks).map(Number).sort((a,b)=>a-b);
+    keys.forEach(k=>{
+        const w=document.createElement('div');w.className='tab-wrap';
+        const b=document.createElement('button');b.className='tab'+(k===S.curWeek?' active':'');
+        b.textContent=`第${k}週`;b.onclick=()=>{S.curWeek=k;S.curStaff=0;save();renderAll();};
+        w.appendChild(b);
+        if(keys.length>1){const d=document.createElement('button');d.className='tab-del';d.textContent='✕';d.onclick=e=>{e.stopPropagation();showConfirm(`第${k}週を削除しますか？`,()=>{delete S.weeks[k];const ks=Object.keys(S.weeks).map(Number);S.curWeek=ks[0];S.curStaff=0;save();renderAll();});};w.appendChild(d);}
+        c.appendChild(w);
+    });
+    const a=document.createElement('button');a.className='tab-add';a.textContent='＋';a.title='週を追加';
+    a.onclick=()=>{const n=Math.max(...keys)+1;S.weeks[n]=createWeek();S.weeks[n].staff=cur().staff.map(s=>({name:s.name,self:{},teacher:{},videoUrl:'',memo:''}));S.weeks[n].items=JSON.parse(JSON.stringify(cur().items));S.curWeek=n;S.curStaff=0;save();renderAll();toast(`第${n}週を追加`);};
+    c.appendChild(a);
+}
+
+function renderInfo(){
+    const w=cur();if(!w)return;
+    document.getElementById('infoBar').innerHTML=`<label>📅 評価日</label><input type="date" value="${w.date}" onchange="cur().date=this.value;save()"><span style="margin-left:auto;font-size:10px;color:var(--text3)">第${S.curWeek}週</span>`;
+}
+
+function renderStaff(){
+    const c=document.getElementById('staffBar');c.innerHTML='';
+    cur().staff.forEach((s,i)=>{
+        const b=document.createElement('button');b.className='staff-chip'+(i===S.curStaff?' active':'');
+        b.textContent=s.name;b.onclick=()=>{S.curStaff=i;save();renderAll();};
+        b.ondblclick=()=>{showInput('スタッフ名を変更',s.name,v=>{if(v){s.name=v;save();renderAll();}});};
+        c.appendChild(b);
+    });
+    const a=document.createElement('button');a.className='staff-chip add';a.textContent='＋ 追加';
+    a.onclick=()=>{showInput('スタッフ名を入力','',v=>{if(v){cur().staff.push({name:v,self:{},teacher:{},videoUrl:'',memo:''});S.curStaff=cur().staff.length-1;save();renderAll();}});};
+    c.appendChild(a);
+    // 削除ボタン(2名以上)
+    if(cur().staff.length>1){const d=document.createElement('button');d.className='btn btn-rose';d.style.fontSize='11px';d.style.padding='4px 10px';d.textContent='✕ 削除';d.onclick=()=>{showConfirm(`「${staff().name}」を削除しますか？`,()=>{cur().staff.splice(S.curStaff,1);S.curStaff=0;save();renderAll();});};c.appendChild(d);}
+}
+
+function renderVideo(){
+    const s=staff();if(!s)return;
+    const c=document.getElementById('videoSec');
+    c.innerHTML=`<h3>🎥 カウンセリング動画</h3>
+    <div class="video-input"><input type="text" placeholder="YouTube・GoogleドライブのURLを貼り付け" value="${s.videoUrl||''}" oninput="staff().videoUrl=this.value;save()"></div>
+    ${s.videoUrl?`<a class="video-link" href="${s.videoUrl}" target="_blank" rel="noopener">🔗 動画を確認する →</a>`:'<div style="font-size:11px;color:var(--text3);margin-top:6px">💡 カウンセリング動画のURLを入力すると確認リンクが表示されます</div>'}`;
+}
+
+function renderEval(){
+    const area=document.getElementById('evalArea');area.innerHTML='';
+    const w=cur();const s=staff();if(!w||!s)return;
+    [{key:'basic',label:'基本',cls:'basic',items:w.items.basic},{key:'tactics',label:'戦術',cls:'tactics',items:w.items.tactics}].forEach(cat=>{
+        const sec=document.createElement('div');sec.className='cat-sec';
+        // 小計計算
+        let selfSum=0,teachSum=0,selfCnt=0,teachCnt=0;
+        cat.items.forEach((_,i)=>{const k=cat.key+'_'+i;if(s.self[k]){selfSum+=s.self[k];selfCnt++;}if(s.teacher[k]){teachSum+=s.teacher[k];teachCnt++;}});
+        sec.innerHTML=`<div class="cat-header ${cat.cls}"><div>${cat.label}<span class="sub">（1項目5点満点 × ${cat.items.length}項目 = ${cat.items.length*5}点）</span></div><div class="subtotal">自己:${selfSum} / 講師:${teachSum}</div></div>`;
+        // テーブル
+        let html='<table class="eval-table"><thead><tr><th>評価項目</th><th>自己評価</th><th>講師評価</th><th>差</th></tr></thead><tbody>';
+        cat.items.forEach((item,i)=>{
+            const k=cat.key+'_'+i;
+            const sv=s.self[k]||0,tv=s.teacher[k]||0;
+            const diff=(sv&&tv)?(sv-tv):null;
+            const hasDiff=diff!==null&&diff!==0;
+            const diffClass=diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero';
+            const diffText=diff!==null?(diff>0?'+'+diff:diff===0?'±0':String(diff)):'—';
+            html+=`<tr class="${hasDiff?'diff-row':''}"><td><div class="item-cell"><button class="item-del" title="削除" onclick="delItem('${cat.key}',${i})">✕</button><div class="item-text" contenteditable="true" onblur="updateItem('${cat.key}',${i},this.textContent)">${item}</div></div></td>`;
+            html+=`<td>${scoreButtons(k,'self',sv)}</td>`;
+            html+=`<td>${scoreButtons(k,'teacher',tv)}</td>`;
+            html+=`<td><span class="diff-cell ${diffClass}">${diffText}</span></td></tr>`;
+        });
+        html+='</tbody></table>';
+        html+=`<button class="add-item-btn" onclick="addItem('${cat.key}')">＋ 項目を追加</button>`;
+        sec.innerHTML+=html;
+        area.appendChild(sec);
+    });
+}
+
+function scoreButtons(key,type,val){
+    let h='<div class="sc">';
+    for(let v=1;v<=5;v++){h+=`<button class="${val===v?'a s'+v:''}" onclick="setScore('${key}','${type}',${v})">${v}</button>`;}
+    h+='</div>';return h;
+}
+
+function setScore(key,type,val){
+    const s=staff();if(!s)return;
+    s[type][key]=(s[type][key]===val)?0:val;
+    save();renderEval();renderTotal();renderPickup();
+}
+
+function updateItem(cat,idx,text){
+    const t=text.trim();if(t)cur().items[cat][idx]=t;save();
+}
+
+function addItem(cat){
+    cur().items[cat].push('新しい項目');save();renderEval();renderTotal();renderPickup();
+    toast('項目を追加しました（テキストをタップで編集）');
+}
+function delItem(cat,idx){
+    const name=cur().items[cat][idx];
+    showConfirm(`「${name}」を削除しますか？`,()=>{
+        cur().items[cat].splice(idx,1);
+        // スコアのキーを詰め直す
+        const s=staff();if(s){
+            const newSelf={},newTeach={};
+            cur().items[cat].forEach((_,i)=>{
+                const oldK=cat+'_'+(i>=idx?i+1:i);
+                const newK=cat+'_'+i;
+                if(s.self[oldK])newSelf[newK]=s.self[oldK];
+                if(s.teacher[oldK])newTeach[newK]=s.teacher[oldK];
+            });
+            // 他カテゴリのキーはそのまま残す
+            const otherCat=cat==='basic'?'tactics':'basic';
+            Object.keys(s.self).forEach(k=>{if(k.startsWith(otherCat))newSelf[k]=s.self[k];});
+            Object.keys(s.teacher).forEach(k=>{if(k.startsWith(otherCat))newTeach[k]=s.teacher[k];});
+            s.self=newSelf;s.teacher=newTeach;
+        }
+        save();renderEval();renderTotal();renderPickup();
+        toast(`「${name}」を削除しました`);
+    });
+}
+
+function renderTotal(){
+    const s=staff();const w=cur();if(!s||!w)return;
+    const allItems=[...w.items.basic.map((_,i)=>'basic_'+i),...w.items.tactics.map((_,i)=>'tactics_'+i)];
+    const maxScore=allItems.length*5;
+    let selfT=0,teachT=0;
+    allItems.forEach(k=>{selfT+=(s.self[k]||0);teachT+=(s.teacher[k]||0);});
+    const selfP=maxScore?Math.round(selfT/maxScore*100):0;
+    const teachP=maxScore?Math.round(teachT/maxScore*100):0;
+    const selfG=getGrade(selfP),teachG=getGrade(teachP);
+    const diffT=selfT-teachT;
+    const diffCol=diffT>0?'var(--rose)':diffT<0?'var(--blue)':'var(--text3)';
+    const diffText=diffT>0?'+'+diffT:diffT===0?'±0':String(diffT);
+
+    document.getElementById('totalBar').innerHTML=`
+    <div class="total-item"><div class="total-label">自己評価 合計</div><div class="total-val" style="color:var(--blue)">${selfT}<span style="font-size:12px;color:var(--text3)">/${maxScore}</span></div></div>
+    <div class="total-item"><div class="total-label">自己 評価</div><div class="grade grade-${selfG.toLowerCase()}">${selfG}</div></div>
+    <div class="total-item"><div class="total-label">差点合計</div><div class="total-val" style="color:${diffCol}">${diffText}</div></div>
+    <div class="total-item"><div class="total-label">講師評価 合計</div><div class="total-val" style="color:var(--sage)">${teachT}<span style="font-size:12px;color:var(--text3)">/${maxScore}</span></div></div>
+    <div class="total-item"><div class="total-label">講師 評価</div><div class="grade grade-${teachG.toLowerCase()}">${teachG}</div></div>`;
+}
+
+function renderPickup(){
+    const s=staff();const w=cur();if(!s||!w)return;
+    const c=document.getElementById('pickupSec');
+    const diffs=[];
+    [{key:'basic',label:'基本',items:w.items.basic},{key:'tactics',label:'戦術',items:w.items.tactics}].forEach(cat=>{
+        cat.items.forEach((item,i)=>{
+            const k=cat.key+'_'+i;
+            const sv=s.self[k]||0,tv=s.teacher[k]||0;
+            if(sv&&tv&&Math.abs(sv-tv)>=3)diffs.push({cat:cat.label,item,diff:sv-tv,self:sv,teacher:tv});
+        });
+    });
+    diffs.sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+    let html='<div class="pickup-sec"><h3>📌 自己評価と講師評価の差が3以上の項目</h3>';
+    if(diffs.length){
+        diffs.forEach(d=>{
+            const sign=d.diff>0?'+':'';
+            html+=`<div class="pickup-item"><span class="p-cat">${d.cat}</span><span style="flex:1">${d.item}</span><span style="font-size:11px;color:var(--text3)">自${d.self} / 講${d.teacher}</span><span class="p-diff">${sign}${d.diff}</span></div>`;
+        });
+    }else{html+='<div class="pickup-empty">✅ 差が3以上の項目はありません</div>';}
+    html+='</div>';
+    c.innerHTML=html;
+}
+
+function renderMemo(){
+    const s=staff();if(!s)return;
+    document.getElementById('memoSec').innerHTML=`<div class="memo-sec"><h3>📝 講師からの総合フィードバック・改善点メモ</h3><textarea class="memo-area" placeholder="具体的な評価コメント、改善点、次回への課題などを記入…" oninput="staff().memo=this.value;save()">${s.memo||''}</textarea></div>`;
+}
+
+function getGrade(p){return p>=90?'A':p>=75?'B':p>=60?'C':p>=45?'D':'E';}
+
+// モーダル
+function showConfirm(msg,cb){
+    document.getElementById('mTitle').textContent='⚠️ 確認';
+    document.getElementById('mMsg').textContent=msg;
+    document.getElementById('mInput').style.display='none';
+    document.getElementById('mOk').onclick=()=>{cb();closeModal();};
+    document.getElementById('modal').classList.add('show');
+}
+function showInput(title,val,cb){
+    document.getElementById('mTitle').textContent=title;
+    document.getElementById('mMsg').textContent='';
+    const inp=document.getElementById('mInput');inp.style.display='block';inp.value=val||'';inp.focus();
+    document.getElementById('mOk').onclick=()=>{cb(inp.value.trim());closeModal();};
+    document.getElementById('modal').classList.add('show');
+    setTimeout(()=>inp.focus(),100);
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+// 保存
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+function saveData(){save();toast('💾 保存しました');}
+
+// Excel出力
+async function exportXLSX(){
+    const wb=XLSX.utils.book_new();
+    const today=new Date().toISOString().slice(0,10);
+    const keys=Object.keys(S.weeks).map(Number).sort((a,b)=>a-b);
+    keys.forEach(wk=>{
+        const w=S.weeks[wk];
+        w.staff.forEach(s=>{
+            const rows=[
+                [`カウンセリング技術共有 評価シート`],
+                [`第${wk}週`,`スタッフ: ${s.name}`,`評価日: ${w.date}`,`出力日: ${today}`],
+                [`動画URL: ${s.videoUrl||'なし'}`],
+                [],
+                ['カテゴリ','評価項目','自己評価','講師評価','差点']
+            ];
+            let sb=0,tb=0;
+            w.items.basic.forEach((item,i)=>{
+                const k='basic_'+i;
+                const sv=s.self[k]||'',tv=s.teacher[k]||'';
+                const diff=(sv&&tv)?sv-tv:'';
+                rows.push(['基本',item,sv,tv,diff]);
+                sb+=(s.self[k]||0);tb+=(s.teacher[k]||0);
+            });
+            rows.push(['','基本 小計',sb,tb,sb-tb],[]);
+            let st=0,tt=0;
+            w.items.tactics.forEach((item,i)=>{
+                const k='tactics_'+i;
+                const sv=s.self[k]||'',tv=s.teacher[k]||'';
+                const diff=(sv&&tv)?sv-tv:'';
+                rows.push(['戦術',item,sv,tv,diff]);
+                st+=(s.self[k]||0);tt+=(s.teacher[k]||0);
+            });
+            rows.push(['','戦術 小計',st,tt,st-tt],[]);
+            const max=(w.items.basic.length+w.items.tactics.length)*5;
+            const selfT=sb+st,teachT=tb+tt;
+            rows.push(
+                ['','合計',selfT,teachT,selfT-teachT],
+                ['','評価',getGrade(Math.round(selfT/max*100)),getGrade(Math.round(teachT/max*100)),''],
+                [],
+                ['講師フィードバック'],
+                [s.memo||'']
+            );
+            const ws=XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols']=[{wch:10},{wch:45},{wch:10},{wch:10},{wch:8}];
+            let name=`W${wk}_${s.name}`;if(name.length>31)name=name.slice(0,31);
+            XLSX.utils.book_append_sheet(wb,ws,name);
+        });
+    });
+    const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const blob=new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const fname=`カウンセリング評価_${new Date().toISOString().slice(0,10)}.xlsx`;
+    if(window.showSaveFilePicker){
+        try{const h=await window.showSaveFilePicker({suggestedName:fname,types:[{description:'Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]});const wr=await h.createWritable();await wr.write(blob);await wr.close();toast('📥 Excelを保存しました');return;}catch(e){if(e.name==='AbortError')return;}
+    }
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fname;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},300);toast('📥 Excelを保存しました');
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+init();
+</script>
+</body>
+</html>
