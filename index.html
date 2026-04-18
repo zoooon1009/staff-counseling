@@ -6,6 +6,8 @@
 <title>カウンセリング技術共有 評価シート</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg:#F5F0EB;--surface:#EDE6DD;--card:#FDFAF6;--text:#3E3226;--text2:#7A6B5D;--text3:#A89B8C;--light:#F5F0EB;--gold:#C5A55A;--gold-l:#E8D5A0;--warm:#D4956A;--sage:#7BA485;--rose:#C9727A;--blue:#6B8EAD;--border:rgba(62,50,38,.08);--border2:rgba(62,50,38,.15);--r:12px;--shadow:0 2px 8px rgba(62,50,38,.08)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -79,8 +81,12 @@ header{background:rgba(62,50,38,.95);backdrop-filter:blur(20px);position:sticky;
 .item-cell{display:flex;align-items:center;gap:4px}
 .item-cell .item-text{flex:1}
 .item-del{width:16px;height:16px;border-radius:50%;border:none;background:rgba(201,114,122,.1);color:var(--rose);font-size:9px;cursor:pointer;opacity:0;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
-.eval-table tr:hover .item-del{opacity:1}
+.item-copy{width:16px;height:16px;border-radius:50%;border:none;background:rgba(107,142,173,.1);color:var(--blue);font-size:9px;cursor:pointer;opacity:0;transition:opacity .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.eval-table tr:hover .item-del,.eval-table tr:hover .item-copy{opacity:1}
 .item-del:hover{background:var(--rose);color:#fff}
+.item-copy:hover{background:var(--blue);color:#fff}
+.copy-all-btn{font-size:10px;padding:3px 8px;border:1px solid rgba(107,142,173,.3);border-radius:5px;background:rgba(107,142,173,.08);color:var(--blue);cursor:pointer;font-family:inherit;transition:all .2s;margin-left:8px}
+.copy-all-btn:hover{background:var(--blue);color:#fff}
 
 /* スコアボタン */
 .sc{display:flex;gap:2px;justify-content:center}
@@ -184,14 +190,44 @@ header{background:rgba(62,50,38,.95);backdrop-filter:blur(20px);position:sticky;
     .pickup-item{flex-wrap:wrap;gap:4px}
     .total-bar{justify-content:center;gap:14px}
 }
+
+/* ルーム画面 */
+.room-screen{position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center}
+.room-box{background:var(--card);border-radius:20px;padding:40px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(62,50,38,.15);animation:fadeIn .5s ease}
+.room-box .logo-i{width:56px;height:56px;font-size:28px;margin:0 auto 16px;border-radius:14px}
+.room-box h2{font-size:18px;color:var(--text);margin-bottom:6px}
+.room-box p{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.room-input{width:100%;padding:14px;border:2px solid var(--border2);border-radius:12px;font-family:inherit;font-size:16px;text-align:center;letter-spacing:4px;font-weight:700;color:var(--text);background:var(--bg);transition:border-color .2s}
+.room-input:focus{outline:none;border-color:var(--gold)}
+.room-enter{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--warm));color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;transition:opacity .2s}
+.room-enter:hover{opacity:.9}
+.room-enter:disabled{opacity:.5;cursor:not-allowed}
+
+/* 接続ステータス */
+.conn-status{display:flex;align-items:center;gap:5px;font-size:10px;padding:4px 10px;border-radius:12px}
+.conn-status .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.conn-on{background:rgba(123,164,133,.15);color:var(--sage)}.conn-on .dot{background:var(--sage)}
+.conn-off{background:rgba(201,114,122,.15);color:var(--rose)}.conn-off .dot{background:var(--rose)}
 </style>
 </head>
 <body>
+
+<div class="room-screen" id="roomScreen">
+<div class="room-box">
+<div class="logo-i">📋</div>
+<h2>カウンセリング評価シート</h2>
+<p>複数端末で同期するための<br>ルームコードを入力してください</p>
+<input class="room-input" id="roomInput" placeholder="例: album2026" maxlength="20">
+<button class="room-enter" id="roomEnter" onclick="enterRoom()">入室する</button>
+<div style="margin-top:16px;font-size:11px;color:var(--text3)">同じコードを入力すると同じデータを共有できます</div>
+</div>
+</div>
 
 <header>
 <div class="h-inner">
     <div class="logo"><div class="logo-i">📋</div><div><h1>カウンセリング評価シート</h1><div class="logo-s">ALBUM Counseling Evaluation</div></div></div>
     <div class="h-btns">
+        <span class="conn-status conn-off" id="connStatus"><span class="dot"></span><span id="connText">接続中...</span></span>
         <button class="btn btn-outline" onclick="exportXLSX()">📥 Excel出力</button>
         <button class="btn btn-sage" onclick="saveData()">💾 保存</button>
     </div>
@@ -222,7 +258,26 @@ header{background:rgba(62,50,38,.95);backdrop-filter:blur(20px);position:sticky;
 <div class="toast" id="toast"></div>
 
 <script>
+// Firebase設定
+const firebaseConfig = {
+  apiKey: "AIzaSyC36KC2NYduNFWIt0Rhzn146m3hK7d-kU",
+  authDomain: "albumk-deccc.firebaseapp.com",
+  databaseURL: "https://albumk-deccc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "albumk-deccc",
+  storageBucket: "albumk-deccc.firebasestorage.app",
+  messagingSenderId: "1098612454238",
+  appId: "1:1098612454238:web:c262cfc4003c88b75d95cf"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const KEY='counsel_eval_v5';
+const ROOM_KEY='counsel_room';
+let roomCode='';
+let dbRef=null;
+let isOnline=false;
+let ignoreNext=false;
+
 const DEFAULT_BASIC=[
     '身だしなみ（ファーストコンタクト）','言葉遣い','目線　表情　姿勢　態度　尊重',
     '挨拶、カウンセリング内でお客様の名前で呼びかける','距離感（触れ方）','ペースを合わせる（ペーシング）',
@@ -245,17 +300,73 @@ const DEFAULT_TACTICS=[
 
 let S={weeks:{},curWeek:1,curStaff:0};
 
-function init(){
-    const saved=localStorage.getItem(KEY);
-    if(saved)S=JSON.parse(saved);
-    if(!S.weeks||!Object.keys(S.weeks).length){S.weeks={1:createWeek()};S.curWeek=1;S.curStaff=0;}
-    // migrate
+// ルーム入室
+function enterRoom(){
+    const code=document.getElementById('roomInput').value.trim();
+    if(!code){toast('ルームコードを入力してください');return;}
+    roomCode=code;
+    localStorage.setItem(ROOM_KEY,roomCode);
+    document.getElementById('roomScreen').style.display='none';
+    startFirebase();
+}
+
+// ルーム画面初期化
+function initRoom(){
+    const saved=localStorage.getItem(ROOM_KEY);
+    if(saved){
+        roomCode=saved;
+        document.getElementById('roomScreen').style.display='none';
+        startFirebase();
+    } else {
+        document.getElementById('roomScreen').style.display='flex';
+        document.getElementById('roomInput').addEventListener('keydown',e=>{if(e.key==='Enter')enterRoom();});
+    }
+}
+
+// Firebase接続開始
+function startFirebase(){
+    dbRef=db.ref('rooms/'+roomCode);
+    // 接続監視
+    db.ref('.info/connected').on('value',snap=>{
+        isOnline=snap.val()===true;
+        updateConnStatus();
+    });
+    // データ取得
+    dbRef.on('value',snap=>{
+        if(ignoreNext){ignoreNext=false;return;}
+        const data=snap.val();
+        if(data){
+            S=data;
+            localStorage.setItem(KEY,JSON.stringify(S));
+        } else {
+            const local=localStorage.getItem(KEY);
+            if(local) S=JSON.parse(local);
+            if(!S.weeks||!Object.keys(S.weeks).length){S.weeks={1:createWeek()};S.curWeek=1;S.curStaff=0;}
+            migrateData();
+            saveToFirebase();
+        }
+        migrateData();
+        renderAll();
+    });
+}
+
+function updateConnStatus(){
+    const el=document.getElementById('connStatus');
+    const txt=document.getElementById('connText');
+    if(isOnline){el.className='conn-status conn-on';txt.textContent='🟢 同期中 ('+roomCode+')';}
+    else{el.className='conn-status conn-off';txt.textContent='🔴 オフライン';}
+}
+
+function migrateData(){
     Object.values(S.weeks).forEach(w=>{
         if(!w.staff)w.staff=[{name:'スタッフ1',self:{},teacher:{},videoUrl:'',memo:''}];
         w.staff.forEach(s=>{if(!s.videoUrl)s.videoUrl='';if(s.memo===undefined)s.memo='';});
         if(!w.items)w.items={basic:[...DEFAULT_BASIC],tactics:[...DEFAULT_TACTICS]};
     });
-    renderAll();
+}
+
+function init(){
+    initRoom();
 }
 
 function createWeek(){
@@ -299,7 +410,6 @@ function renderStaff(){
     const a=document.createElement('button');a.className='staff-chip add';a.textContent='＋ 追加';
     a.onclick=()=>{showInput('スタッフ名を入力','',v=>{if(v){cur().staff.push({name:v,self:{},teacher:{},videoUrl:'',memo:''});S.curStaff=cur().staff.length-1;save();renderAll();}});};
     c.appendChild(a);
-    // 削除ボタン(2名以上)
     if(cur().staff.length>1){const d=document.createElement('button');d.className='btn btn-rose';d.style.fontSize='11px';d.style.padding='4px 10px';d.textContent='✕ 削除';d.onclick=()=>{showConfirm(`「${staff().name}」を削除しますか？`,()=>{cur().staff.splice(S.curStaff,1);S.curStaff=0;save();renderAll();});};c.appendChild(d);}
 }
 
@@ -316,11 +426,9 @@ function renderEval(){
     const w=cur();const s=staff();if(!w||!s)return;
     [{key:'basic',label:'基本',cls:'basic',items:w.items.basic},{key:'tactics',label:'戦術',cls:'tactics',items:w.items.tactics}].forEach(cat=>{
         const sec=document.createElement('div');sec.className='cat-sec';
-        // 小計計算
         let selfSum=0,teachSum=0,selfCnt=0,teachCnt=0;
         cat.items.forEach((_,i)=>{const k=cat.key+'_'+i;if(s.self[k]){selfSum+=s.self[k];selfCnt++;}if(s.teacher[k]){teachSum+=s.teacher[k];teachCnt++;}});
-        sec.innerHTML=`<div class="cat-header ${cat.cls}"><div>${cat.label}<span class="sub">（1項目5点満点 × ${cat.items.length}項目 = ${cat.items.length*5}点）</span></div><div class="subtotal">自己:${selfSum} / 講師:${teachSum}</div></div>`;
-        // テーブル
+        sec.innerHTML=`<div class="cat-header ${cat.cls}"><div>${cat.label}<span class="sub">（1項目5点満点 × ${cat.items.length}項目 = ${cat.items.length*5}点）</span></div><div style="display:flex;align-items:center;gap:6px"><button class="copy-all-btn" onclick="copyAllItems('${cat.key}')">📋 全項目コピー</button><span class="subtotal">自己:${selfSum} / 講師:${teachSum}</span></div></div>`;
         let html='<table class="eval-table"><thead><tr><th>評価項目</th><th>自己評価</th><th>講師評価</th><th>差</th></tr></thead><tbody>';
         cat.items.forEach((item,i)=>{
             const k=cat.key+'_'+i;
@@ -329,7 +437,7 @@ function renderEval(){
             const hasDiff=diff!==null&&diff!==0;
             const diffClass=diff>0?'diff-pos':diff<0?'diff-neg':'diff-zero';
             const diffText=diff!==null?(diff>0?'+'+diff:diff===0?'±0':String(diff)):'—';
-            html+=`<tr class="${hasDiff?'diff-row':''}"><td><div class="item-cell"><button class="item-del" title="削除" onclick="delItem('${cat.key}',${i})">✕</button><div class="item-text" contenteditable="true" onblur="updateItem('${cat.key}',${i},this.textContent)">${item}</div></div></td>`;
+            html+=`<tr class="${hasDiff?'diff-row':''}"><td><div class="item-cell"><button class="item-del" title="削除" onclick="delItem('${cat.key}',${i})">✕</button><button class="item-copy" title="コピー" onclick="copyItem('${cat.key}',${i})">⎘</button><div class="item-text" contenteditable="true" onblur="updateItem('${cat.key}',${i},this.textContent)">${item}</div></div></td>`;
             html+=`<td>${scoreButtons(k,'self',sv)}</td>`;
             html+=`<td>${scoreButtons(k,'teacher',tv)}</td>`;
             html+=`<td><span class="diff-cell ${diffClass}">${diffText}</span></td></tr>`;
@@ -361,11 +469,23 @@ function addItem(cat){
     cur().items[cat].push('新しい項目');save();renderEval();renderTotal();renderPickup();
     toast('項目を追加しました（テキストをタップで編集）');
 }
+function copyItem(cat,idx){
+    const text=cur().items[cat][idx];
+    navigator.clipboard.writeText(text).then(()=>toast('📋 コピーしました: '+text)).catch(()=>{fallbackCopy(text);toast('📋 コピーしました');});
+}
+function copyAllItems(cat){
+    const items=cur().items[cat];
+    const text=items.join('\n');
+    navigator.clipboard.writeText(text).then(()=>toast(`📋 ${cat==='basic'?'基本':'戦術'}の全${items.length}項目をコピーしました`)).catch(()=>{fallbackCopy(text);toast('📋 コピーしました');});
+}
+function fallbackCopy(text){
+    const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+}
 function delItem(cat,idx){
     const name=cur().items[cat][idx];
     showConfirm(`「${name}」を削除しますか？`,()=>{
         cur().items[cat].splice(idx,1);
-        // スコアのキーを詰め直す
         const s=staff();if(s){
             const newSelf={},newTeach={};
             cur().items[cat].forEach((_,i)=>{
@@ -374,7 +494,6 @@ function delItem(cat,idx){
                 if(s.self[oldK])newSelf[newK]=s.self[oldK];
                 if(s.teacher[oldK])newTeach[newK]=s.teacher[oldK];
             });
-            // 他カテゴリのキーはそのまま残す
             const otherCat=cat==='basic'?'tactics':'basic';
             Object.keys(s.self).forEach(k=>{if(k.startsWith(otherCat))newSelf[k]=s.self[k];});
             Object.keys(s.teacher).forEach(k=>{if(k.startsWith(otherCat))newTeach[k]=s.teacher[k];});
@@ -454,9 +573,15 @@ function showInput(title,val,cb){
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
 
-// 保存
-function save(){localStorage.setItem(KEY,JSON.stringify(S));}
-function saveData(){save();toast('💾 保存しました');}
+// 保存（Firebase + localStorage）
+function saveToFirebase(){
+    if(dbRef){ignoreNext=true;dbRef.set(S);}
+}
+function save(){
+    localStorage.setItem(KEY,JSON.stringify(S));
+    saveToFirebase();
+}
+function saveData(){save();toast('💾 クラウドに保存しました');}
 
 // Excel出力
 async function exportXLSX(){
