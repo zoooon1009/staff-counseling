@@ -230,6 +230,7 @@ header{background:rgba(62,50,38,.95);backdrop-filter:blur(20px);position:sticky;
         <span class="conn-status conn-off" id="connStatus"><span class="dot"></span><span id="connText">接続中...</span></span>
         <button class="btn btn-outline" onclick="exportXLSX()">📥 Excel出力</button>
         <button class="btn btn-sage" onclick="saveData()">💾 保存</button>
+        <button class="btn btn-rose" onclick="logout()" title="ルームから退出">🚪 退出</button>
     </div>
 </div>
 </header>
@@ -282,19 +283,19 @@ const DEFAULT_BASIC=[
     '身だしなみ（ファーストコンタクト）','言葉遣い','目線　表情　姿勢　態度　尊重',
     '挨拶、カウンセリング内でお客様の名前で呼びかける','距離感（触れ方）','ペースを合わせる',
     '技術・施術説明の的確明確さ','視覚・聴覚・身体感覚に合わせる','料金　終わり時間を明確に説明しているか',
-    'カウンセリングのスムーズさ','お客様の表情　満足度'
+    'カウンセリングの流れのスムーズさ','お客様の表情　満足度'
 ];
 const DEFAULT_TACTICS=[
     '現在の悩み・不満・不快　要望の傾聴は出来たか','悩みなどの優先順位を把握して理解できたか',
-    '悩みなどに対して深堀りができてるか','悩みを傾聴している時提案をすぐにしてしまってないか',
+    '悩みなどに対して深堀りができてるか','お客様の悩みを傾聴するタイミングで提案してしまってないか',
     '悩みなどの本質を引き出し安心させれてるか','施術に対しての不安なポイントを理解しているか',
     '今後の理想の状態の傾聴ができたか','理想の状態を言語化・共有できたか',
     'お客様の問いを想像できてるか','理想の状態の本質まで導けたか',
     'オーダーを把握して適切な施術、解決策を提案できたか','今後のスケジュールや未来の提案はできたか',
     'ライフスタイルに加味した提案はできたか','お客様の想定内の流れの中で終わっていないか',
-    'メニューに囚われない本質の提案力','信頼　安心　構築できたか',
-    'お客様に対しての尊重を一貫してできているか','その人だけのプランニングができたか',
-    '全ての流れからの次回来店はあるか','傾聴での発話して無い声の引き出しはできたか',
+    'メニューに囚われない本質の提案力','信頼　安心　は構築できたか',
+    'お客様に対しての尊重を一貫してできているか','お客様に合わせた今後の計画ができたか',
+    '全ての流れからの次回来店の確実性はあるか','傾聴での発話して無い悩みの引き出しはできたか',
     'カウンセリング中や後にワクワクしているか'
 ];
 
@@ -582,6 +583,20 @@ function save(){
     saveToFirebase();
 }
 function saveData(){save();toast('💾 クラウドに保存しました');}
+
+// ログアウト（ルームから退出）
+function logout(){
+    showConfirm('ルームから退出しますか？',()=>{
+        if(dbRef){dbRef.off();dbRef=null;}
+        db.ref('.info/connected').off();
+        localStorage.removeItem(ROOM_KEY);
+        roomCode='';
+        isOnline=false;
+        document.getElementById('roomInput').value='';
+        document.getElementById('roomScreen').style.display='flex';
+        toast('🚪 ルームから退出しました');
+    });
+}
 
 // Excel出力
 async function exportXLSX(){
