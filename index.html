@@ -391,7 +391,7 @@ function renderTabs(){
         c.appendChild(w);
     });
     const a=document.createElement('button');a.className='tab-add';a.textContent='＋';a.title='週を追加';
-    a.onclick=()=>{const n=Math.max(...keys)+1;S.weeks[n]=createWeek();S.weeks[n].staff=cur().staff.map(s=>({name:s.name,self:{},teacher:{},videoUrl:'',memo:''}));S.weeks[n].items=JSON.parse(JSON.stringify(cur().items));S.curWeek=n;S.curStaff=0;save();renderAll();toast(`第${n}週を追加`);};
+    a.onclick=()=>{const prevWeek=cur();const prevItems=JSON.parse(JSON.stringify(prevWeek.items));const prevStaff=prevWeek.staff.map(s=>({name:s.name,self:{},teacher:{},videoUrl:'',memo:''}));const n=Math.max(...keys)+1;S.weeks[n]=createWeek();S.weeks[n].staff=prevStaff;S.weeks[n].items=prevItems;S.curWeek=n;S.curStaff=0;save();renderAll();toast(`第${n}週を追加（前週の項目を引き継ぎ）`);};
     c.appendChild(a);
 }
 
